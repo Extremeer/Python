@@ -41,13 +41,15 @@ class CustomDataset(Dataset):
         # 创建低分辨率图像（模拟输入）
         low_res_transform = transforms.Compose([
             transforms.Resize((image.size[1] // self.upscale_factor, image.size[0] // self.upscale_factor)),
-            transforms.Resize((image.size[1], image.size[0])),
+            #transforms.Resize((image.size[1], image.size[0])),
         ])
         low_res_image = low_res_transform(image)
 
         if self.transform:
             low_res_image = self.transform(low_res_image)
             image = self.transform(image)
+
+        #print(image.size[0])
 
         return low_res_image, image  # 返回低分辨率图像和高分辨率图像对
 
@@ -72,6 +74,7 @@ for epoch in range(num_epochs):
         inputs, targets = batch[0].to(device), batch[1].to(device)
         optimizer.zero_grad()
         outputs = model(inputs)
+        
         loss = criterion(outputs, targets)
         loss.backward()
         optimizer.step()
