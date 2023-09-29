@@ -53,32 +53,34 @@ class CustomDataset(Dataset):
 
         return low_res_image, image  # 返回低分辨率图像和高分辨率图像对
 
-# 数据预处理和加载器
-data_transform = transforms.Compose([transforms.ToTensor()])
-train_dataset = CustomDataset("SuperResolution/dataset/train", transform=data_transform)
-train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
+if __name__ == "__main__":
 
-# 创建模型实例并将其移到GPU（如果可用）
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-model = SuperResolutionModel().to(device)
+    # 数据预处理和加载器
+    data_transform = transforms.Compose([transforms.ToTensor()])
+    train_dataset = CustomDataset("SuperResolution/dataset/train", transform=data_transform)
+    train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
 
-# 定义损失函数和优化器
-criterion = nn.MSELoss()
-optimizer = optim.Adam(model.parameters(), lr=0.001)
+    # 创建模型实例并将其移到GPU（如果可用）
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    model = SuperResolutionModel().to(device)
 
-# 训练模型
-num_epochs = 10
-for epoch in range(num_epochs):
-    model.train()
-    for batch in train_loader:
-        inputs, targets = batch[0].to(device), batch[1].to(device)
-        optimizer.zero_grad()
-        outputs = model(inputs)
-        
-        loss = criterion(outputs, targets)
-        loss.backward()
-        optimizer.step()
-    print(f"Epoch [{epoch+1}/{num_epochs}] Loss: {loss.item()}")
+    # 定义损失函数和优化器
+    criterion = nn.MSELoss()
+    optimizer = optim.Adam(model.parameters(), lr=0.001)
 
-# 保存模型
-torch.save(model.state_dict(), "SuperResolution/super_resolution_model.pth")
+    # 训练模型
+    num_epochs = 10
+    for epoch in range(num_epochs):
+        model.train()
+        for batch in train_loader:
+            inputs, targets = batch[0].to(device), batch[1].to(device)
+            optimizer.zero_grad()
+            outputs = model(inputs)
+            
+            loss = criterion(outputs, targets)
+            loss.backward()
+            optimizer.step()
+        print(f"Epoch [{epoch+1}/{num_epochs}] Loss: {loss.item()}")
+
+    # 保存模型
+    torch.save(model.state_dict(), "SuperResolution/super_resolution_model.pth")
